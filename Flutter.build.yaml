@@ -1,0 +1,9 @@
+command: flutter build apk
+file: build/app/outputs/apk/release/app-release.apk
+permission: +x
+# path & new file name
+# output: /usr/bin/build
+output: 
+run_output: false
+# execute after build
+execute: mv build/app/outputs/apk/release/app-release.apk "D:/Libraries/Documents/Google/Android/amiami.apk"

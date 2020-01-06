@@ -1,0 +1,8 @@
+{
+  "command": "go build build.go",
+  "permission" : "+x",
+  "output": {
+    "from": "./",
+    "to": "/tmp/abc"
+  }
+}
