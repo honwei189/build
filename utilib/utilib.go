@@ -1,10 +1,10 @@
-// description      : An utilities tool build with GoLang to help user to run build certains files without enter a set of commands with flags (similar with Makefile),
-//                    supported GoLang, Docker, C and etc...
-// version          : "1.0.0"
-// creator          : Gordon Lim <honwei189@gmail.com>
-// create           : 25/09/2019 19:18:45
-// last moified     : 06/01/2020 19:48:55
-// last moified by  : Gordon Lim <honwei189@gmail.com>
+// description       : An utilities tool build with GoLang to help user to run build certains files without enter a set of commands with flags (similar with Makefile),
+//                     supported GoLang, Docker, C and etc...
+// version           : "1.0.0"
+// creator           : Gordon Lim <honwei189@gmail.com>
+// created           : 25/09/2019 19:18:45
+// last modified     : 06/01/2020 19:48:55
+// last modified by  : Gordon Lim <honwei189@gmail.com>
 
 package utilib
 
