@@ -1,10 +1,11 @@
-// description       : An utilities tool build with GoLang to help user to run build certains files without enter a set of commands with flags (similar with Makefile),
-//                    supported GoLang, Docker, C and etc...
-// version           : "1.0.0"
-// creator           : Gordon Lim <honwei189@gmail.com>
-// created           : 25/09/2019 19:18:46
-// last modified     : 06/01/2020 19:46:09
-// last modified by  : Gordon Lim <honwei189@gmail.com>
+/*
+ * @description       : An utilities tool build with GoLang to help user to run build certains files without enter a set of commands with flags (similar with Makefile), supported GoLang, Docker, C and etc...
+ * @version           : "1.0.0"
+ * @creator           : Gordon Lim <honwei189@gmail.com>
+ * @created           : 25/09/2019 19:18:46
+ * @last modified     : 02/06/2020 13:38:43
+ * @last modified by  : Gordon Lim <honwei189@gmail.com>
+ */
 
 package main
 
@@ -472,7 +473,7 @@ func main() {
 	app.Authors = []cli.Author{
 		cli.Author{
 			Name:  "Gordon Lim",
-			Email: "gordon@weki.com.my",
+			Email: "honwei189@gmail.com",
 		},
 	}
 	app.Copyright = color.FgMagenta.Render("2019 Gordon Lim") + "\n"
@@ -677,6 +678,32 @@ func readConf(path ...string) {
 	}
 
 	if fileExists(confPath) {
+		// file, err := os.Open(confPath)
+		// defer file.Close()
+
+		// if err != nil {
+		// 	log.Fatal(err)
+		// }
+
+		// // Start reading from the file using a scanner.
+		// scanner := bufio.NewScanner(file)
+
+		// for scanner.Scan() {
+		// 	line := scanner.Text()
+
+		// 	// fmt.Printf(" > Read %d characters\n", len(line))
+
+		// 	// Process the line here.
+		// 	// fmt.Println(" > > " + LimitLength(line, 50))
+		// 	fmt.Println(line)
+		// }
+
+		// if scanner.Err() != nil {
+		// 	fmt.Printf(" > Failed!: %v\n", scanner.Err())
+		// }
+
+		// os.Exit(0)
+
 		config, err := yaml.ReadFile(confPath)
 		if err != nil {
 			fmt.Println(err)
@@ -692,6 +719,9 @@ func readConf(path ...string) {
 		// fmt.Println(output)
 		// fmt.Println(config.Get("path"))
 		// fmt.Println(config.GetBool("enabled"))
+
+		// fmt.Println(config)
+		// os.Exit(0)
 	}
 
 	path = nil
