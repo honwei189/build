@@ -1,10 +1,11 @@
-// description       : An utilities tool build with GoLang to help user to run build certains files without enter a set of commands with flags (similar with Makefile),
-//                     supported GoLang, Docker, C and etc...
-// version           : "1.0.0"
-// creator           : Gordon Lim <honwei189@gmail.com>
-// created           : 25/09/2019 19:18:45
-// last modified     : 06/01/2020 19:48:55
-// last modified by  : Gordon Lim <honwei189@gmail.com>
+/*
+ * @description       : An utilities tool build with GoLang to help user to run build certains files without enter a set of commands with flags (similar with Makefile), supported GoLang, Docker, C and etc...
+ * @version           : "1.0.1"
+ * @creator           : Gordon Lim <honwei189@gmail.com>
+ * @created           : 25/09/2019 19:18:45
+ * @last modified     : 02/06/2020 14:04:28
+ * @last modified by  : Gordon Lim <honwei189@gmail.com>
+ */
 
 package utilib
 
@@ -202,19 +203,19 @@ func InitConf() {
 		log.Println(err)
 	}
 
-	if _, err := f.WriteString("Permission: " + Conf.Permission); err != nil {
+	if _, err := f.WriteString("permission: " + Conf.Permission); err != nil {
 		log.Println(err)
 	}
 
-	if _, err := f.WriteString("# path & new file name\n"); err != nil {
+	if _, err := f.WriteString("# path & new file name\r\n"); err != nil {
 		log.Println(err)
 	}
 
-	if _, err := f.WriteString("Output: " + Conf.Output); err != nil {
+	if _, err := f.WriteString("output: " + Conf.Output); err != nil {
 		log.Println(err)
 	}
 
-	if _, err := f.WriteString("run_Output: " + strconv.FormatBool(Conf.RunOutput) + "\n"); err != nil {
+	if _, err := f.WriteString("run_output: " + strconv.FormatBool(Conf.RunOutput)); err != nil {
 		log.Println(err)
 	}
 
