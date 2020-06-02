@@ -1,9 +1,9 @@
 /*
  * @description       : An utilities tool build with GoLang to help user to run build certains files without enter a set of commands with flags (similar with Makefile), supported GoLang, Docker, C and etc...
- * @version           : "1.0.0"
+ * @version           : "1.0.1" (02/06/2020 16:24:33) Rectified unable to build file with command = "build" only
  * @creator           : Gordon Lim <honwei189@gmail.com>
  * @created           : 25/09/2019 19:18:46
- * @last modified     : 02/06/2020 14:04:16
+ * @last modified     : 02/06/2020 16:26:34
  * @last modified by  : Gordon Lim <honwei189@gmail.com>
  */
 
@@ -49,413 +49,6 @@ var cliArgs = []string{}
 var run int
 var fileOutput string
 var conf configuration
-
-// var conf configuration
-
-func executeBuild() {
-
-}
-
-func runCommand(filename string) {
-	extension := ""
-	name := ""
-	shellCmd := ""
-	var cmdArgs = []string{}
-
-	switch strings.ToLower(filename) {
-	case "angular", "ng":
-		extension = "angular"
-		shellCmd = ""
-	case "react":
-		extension = "react"
-		shellCmd = ""
-	case "flutter":
-		extension = "flutter"
-		shellCmd = "flutter"
-	case "makefile":
-		extension = "cpp"
-		shellCmd = "gcc"
-	case "dockerfile":
-		extension = "docker"
-		shellCmd = "docker"
-	default:
-		extension = filepath.Ext(filename)
-		shellCmd = extension
-	}
-
-	extension = strings.ToLower(strings.Replace(extension, ".", "", 1))
-	name = strings.TrimSuffix(filename, filepath.Ext(filename))
-
-	if len(conf.Command) > 0 {
-		cmdArgs = strings.Fields(conf.Command)
-		shellCmd = cmdArgs[0]
-		cmdArgs = removeArrayIndex(cmdArgs, 0)
-		if conf.RunOutput {
-			run = 1
-		} else {
-			run = 0
-		}
-
-		if shellCmd == "flutter" {
-			extension = shellCmd
-		}
-	}
-
-	// cmdRunOnly("mv ./build/app/outputs/apk/release/app-release.apk d:/amiami.apk")
-	// os.Exit(0)
-
-	switch extension {
-	case "apk", "flutter":
-		// cmdRun2(shellCmd, "build", "apk")
-		cmdRun3(shellCmd, cmdArgs)
-
-	case "angular", "react":
-		cmdRunOnly(conf.Command)
-
-	// case "c", "cpp":
-	// 	cmdRun2(shellCmd, "", filename)
-	// 	cmdRun("./"+name, args, "")
-	// case "docker":
-	// 	// for _, each := range cliArgs {
-	// 	// 	filename = filename + " " + each
-	// 	// }
-
-	// 	args = append(args, "build")
-	// 	args = append(args, "-t")
-
-	// 	for _, each := range cliArgs {
-	// 		args = append(args, each)
-	// 	}
-
-	// 	// fmt.Println(args)
-	// 	cmdRun3(shellCmd, args)
-	// 	args = nil
-	case "c", "cpp", "docker", "go":
-		cmdArgs = append(cmdArgs, filename)
-		cmdRun3(shellCmd, cmdArgs)
-		// cmdRun2(shellCmd, "build", filename)
-
-	default:
-		fmt.Println("\n\nInvalid file to run build")
-		os.Exit(0)
-		break
-	}
-
-	if len(conf.Permission) > 0 {
-		if runtime.GOOS == "linux" {
-			// cmdRun2("chmod", conf.Permission, "./"+name)
-			cmdRunOnly("chmod " + conf.Permission + " ./" + name)
-		}
-	}
-
-	cmdShell := "mv"
-
-	if runtime.GOOS == "windows" {
-		if !commandExists(cmdShell) {
-			cmdShell = "cmd /c move"
-		}
-	}
-
-	if len(conf.Output) > 0 {
-		// cmdRun2("mv", "./"+name, conf.Output)
-		cmdRunOnly(cmdShell + " " + name + " " + conf.Output)
-	} else if len(fileOutput) > 0 {
-		cmdRunOnly(cmdShell + " " + name + " " + fileOutput)
-	}
-
-	if len(conf.Execute) > 0 {
-		cmdRunOnly(conf.Execute)
-	}
-
-	if run == 1 {
-		if len(conf.Output) > 0 {
-			cmdRun(conf.Output, args, "")
-		} else {
-			cmdRun("./"+name, args, "")
-		}
-	}
-
-	args = nil
-	cmdArgs = nil
-}
-
-func commandExists(cmd string) bool {
-	_, err := exec.LookPath(cmd)
-	return err == nil
-}
-
-func cmdRun(shellCmd string, args []string, filename string) {
-	args = append(args, filename)
-
-	for _, each := range cliArgs {
-		args = append(args, each)
-	}
-
-	// log.Println(args)
-
-	if len(shellCmd) > 0 {
-		cmd := exec.Command(shellCmd, args...)
-		args = nil
-
-		// create a pipe for the output of the script
-		cmdReader, err := cmd.StdoutPipe()
-		if err != nil {
-			// fmt.Fprintln(os.Stderr, "Error creating StdoutPipe for Cmd", err)
-			os.Exit(0)
-			return
-		}
-
-		scanner := bufio.NewScanner(cmdReader)
-		go func() {
-			for scanner.Scan() {
-				// fmt.Printf("\t > %s\n", scanner.Text())
-				// println(scanner.Text())
-				fmt.Printf("%s\n", scanner.Text())
-			}
-		}()
-
-		// bufio.NewReaderSize(cmdReader, 20000000000)
-		// scanner := bufio.NewScanner(cmdReader)
-		// go func() {
-		// 	// buf := make([]byte, 0, 64*1024)
-		// 	// scanner.Buffer(buf, 10240*1024*1024)
-
-		// 	const maxCapacity = 512 * 8096
-		// 	buf := make([]byte, maxCapacity)
-		// 	scanner.Buffer(buf, maxCapacity*(8192*8192)*256)
-		// 	for scanner.Scan() {
-		// 		// fmt.Printf("\t > %s\n", scanner.Text())
-		// 		// println(scanner.Text())
-		// 		fmt.Printf("%s\n", scanner.Text())
-		// 	}
-		// }()
-
-		// scanner := bufio.NewScanner(cmdReader)
-		// // scanner.Split(bufio.ScanWords)
-		// count := 0
-		// go func() {
-		// 	split := func(data []byte, atEOF bool) (advance int, token []byte, err error) {
-		// 		count++
-		// 		fmt.Printf("%t\t%d\t%s\n", atEOF, len(data), data)
-		// 		return 0, nil, nil
-		// 	}
-		// 	scanner.Split(split)
-		// 	buf := make([]byte, 1024*8096)
-		// 	scanner.Buffer(buf, bufio.MaxScanTokenSize*(8192*8192)*256)
-		// 	for scanner.Scan() {
-		// 		// fmt.Printf("%s\n", scanner.Text())
-		// 	}
-
-		// 	buf = nil
-		// 	scanner = nil
-		// 	println(count)
-		// }()
-		err = cmd.Start()
-		if err != nil {
-			// fmt.Fprintln(os.Stderr, "Error starting Cmd", err)
-			// fmt.Println(os.Stderr, "\n\n"+color.FgRed.Render(err)+"\n")
-			os.Exit(0)
-			return
-		}
-
-		err = cmd.Wait()
-		if err != nil {
-			// fmt.Fprintln(os.Stderr, "Error waiting for Cmd", err)
-			// fmt.Println(os.Stderr, "\n\n"+color.FgRed.Render(err)+"\n")
-			os.Exit(0)
-			return
-		}
-	}
-}
-
-func cmdRun2(shellCmd string, opt string, filename string) {
-	cmd := exec.Command(shellCmd, opt, filename)
-	var stdout, stderr []byte
-	var errStdout, errStderr error
-	stdoutIn, _ := cmd.StdoutPipe()
-	stderrIn, _ := cmd.StderrPipe()
-	cmd.Start()
-	go func() {
-		stdout, errStdout = copyAndCapture(os.Stdout, stdoutIn)
-	}()
-	go func() {
-		stderr, errStderr = copyAndCapture(os.Stderr, stderrIn)
-	}()
-	err := cmd.Wait()
-	if err != nil {
-		// log.Fatalf("cmd.Run() failed with %s\n", err)
-		// fmt.Println("\n\nCommand error... Please confirm your confirm")
-		// fmt.Println("\n\n" + color.FgRed.Render("Command error... Please confirm") + "\n")
-		fmt.Println("\n\n" + color.FgRed.Render("Terminated ...") + "\n")
-		os.Exit(0)
-	}
-	if errStdout != nil || errStderr != nil {
-		// log.Fatalf("failed to capture stdout or stderr\n")
-		// fmt.Println("\n\n" + color.FgRed.Render("Unable to capture output from command...") + "\n")
-		fmt.Println("\n\n" + color.FgRed.Render("Terminated ...") + "\n")
-		os.Exit(0)
-	}
-	// outStr, errStr := string(stdout), string(stderr)
-	// fmt.Printf("\nout:\n%s\nerr:\n%s\n", outStr, errStr)
-	outStr, _ := string(stdout), string(stderr)
-	fmt.Println(outStr)
-	outStr = ""
-	stdoutIn = nil
-	stderrIn = nil
-	errStdout = nil
-	stderr = nil
-	stdout = nil
-}
-
-func cmdRun3(shellCmd string, opt []string) {
-	cmd := exec.Command(shellCmd, opt...)
-	var stdout, stderr []byte
-	var errStdout, errStderr error
-	stdoutIn, _ := cmd.StdoutPipe()
-	stderrIn, _ := cmd.StderrPipe()
-	cmd.Start()
-	go func() {
-		stdout, errStdout = copyAndCapture(os.Stdout, stdoutIn)
-	}()
-	go func() {
-		stderr, errStderr = copyAndCapture(os.Stderr, stderrIn)
-	}()
-	err := cmd.Wait()
-	if err != nil {
-		// log.Fatalf("cmd.Run() failed with %s\n", err)
-		// fmt.Println("\n\nCommand error... Please confirm your confirm")
-		// fmt.Println("\n\n" + color.FgRed.Render("Command error... Please confirm") + "\n")
-		fmt.Println("\n\n" + color.FgRed.Render("Terminated ...") + "\n")
-		os.Exit(0)
-	}
-	if errStdout != nil || errStderr != nil {
-		// log.Fatalf("failed to capture stdout or stderr\n")
-		// fmt.Println("\n\n" + color.FgRed.Render("Unable to capture output from command...") + "\n")
-		fmt.Println("\n\n" + color.FgRed.Render("Terminated ...") + "\n")
-		os.Exit(0)
-	}
-	// outStr, errStr := string(stdout), string(stderr)
-	// fmt.Printf("\nout:\n%s\nerr:\n%s\n", outStr, errStr)
-	outStr, _ := string(stdout), string(stderr)
-	fmt.Println(outStr)
-	outStr = ""
-	stdoutIn = nil
-	stderrIn = nil
-	errStdout = nil
-	stderr = nil
-	stdout = nil
-}
-
-func cmdRunOnly(cmdString string) {
-	var multiCmd []string
-	// var commands []string
-	var shell string
-	// var secondShell string
-
-	// cmaString = Addslashes(cmdString)
-
-	if strings.Contains(cmdString, "&&") {
-		multiCmd = strings.Split(cmdString, "&&")
-
-		for _, v := range multiCmd {
-			cmdRunOnly(v)
-		}
-
-		multiCmd = nil
-
-	} else {
-		// commands = strings.Fields(cmdString)
-		r := csv.NewReader(strings.NewReader(cmdString))
-		r.Comma = ' ' // space
-		commands, err := r.Read()
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		// fmt.Printf("\nFields:\n")
-		// for _, field := range fields {
-		// 	fmt.Printf("%q\n", field)
-		// }
-
-		// fmt.Println(fields)
-
-		shell = commands[0]
-		commands = removeArrayIndex(commands, 0)
-		// secondShell = commands[0]
-		// commands = removeArrayIndex(commands, 0)
-
-		// fmt.Println(commands)
-
-		if output, err := exec.Command(shell, commands...).CombinedOutput(); err != nil {
-			fmt.Printf("%s %s \n\nfailed with %s\n\n%s\n\n", color.FgRed.Render(shell), color.FgRed.Render(strings.Join(commands, " ")), err, output)
-		} else {
-			// fmt.Printf("%s\n", c)
-		}
-
-		// cmd := exec.Command(shell, commands...)
-		// // cmd.Stdin = os.Stdin
-		// // _, err := cmd.CombinedOutput()
-		// // cmd := exec.Command(cmdString)
-		// cmd.Stdout = os.Stdout
-		// err := cmd.Run()
-		// if err != nil {
-		// 	fmt.Printf("%s %s \n\nfailed with %s\n", color.FgRed.Render(shell), color.FgRed.Render(strings.Join(commands, " ")), err)
-		// 	os.Exit(0)
-		// }
-
-		commands = nil
-		shell = ""
-
-		// if c, err := exec.Command("cmd", "/c", cmdString).CombinedOutput(); err != nil {
-		// 	log.Fatal(err)
-		// } else {
-		// 	fmt.Printf("%s\n", c)
-		// }
-	}
-
-	// commands := strings.Fields(cmdString)
-	// shell := commands[0]
-	// commands = removeArrayIndex(commands, 0)
-
-	// cmd := exec.Command(shell, commands)
-	// cmd.Stdout = os.Stdout
-	// cmd.Run()
-
-	// cmd := exec.Command("ls", "-lah")
-	// var stdout, stderr bytes.Buffer
-	// cmd.Stdout = &stdout
-	// cmd.Stderr = &stderr
-	// err := cmd.Run()
-	// if err != nil {
-	//     log.Fatalf("cmd.Run() failed with %s\n", err)
-	// }
-	// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
-	// fmt.Printf("out:\n%s\nerr:\n%s\n", outStr, errStr)
-}
-
-func copyAndCapture(w io.Writer, r io.Reader) ([]byte, error) {
-	var out []byte
-	buf := make([]byte, 1024, 1024)
-	for {
-		n, err := r.Read(buf[:])
-		if n > 0 {
-			d := buf[:n]
-			out = append(out, d...)
-			os.Stdout.Write(d)
-		}
-		if err != nil {
-			// Read returns io.EOF at the end of file, which is not an error for us
-			if err == io.EOF {
-				err = nil
-			}
-			return out, err
-		}
-	}
-	// never reached
-	// panic(true)
-	// return nil, nil
-}
 
 func main() {
 	var confPath string
@@ -588,19 +181,20 @@ func main() {
 		log.Fatal(err)
 	}
 
-	readConf(confPath)
+	conf2 := readConf(confPath)
 
 	if len(cliArgs) > 0 && len(file) == 0 {
 		file = cliArgs[0]
 		cliArgs = removeArrayIndex(cliArgs, 0)
 	} else if numFlags == 0 && len(cliArgs) == 0 && len(file) == 0 {
+
 		dir, err := os.Getwd()
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		if fileExists("build.yaml") {
-			file = conf.File
+			file = conf2.File
 		} else {
 			if fileExists("Dockerfile") {
 				file = "Dockerfile"
@@ -648,7 +242,6 @@ func main() {
 				}
 			}
 		}
-
 	}
 
 	if len(file) > 0 {
@@ -668,7 +261,429 @@ func main() {
 	}
 }
 
-func readConf(path ...string) {
+// var conf configuration
+
+func executeBuild() {
+
+}
+
+func runCommand(filename string) {
+	extension := ""
+	name := ""
+	shellCmd := ""
+	var cmdArgs = []string{}
+
+	utilib.Clearscreen()
+
+	color.Red.Println("Build start ...")
+
+	switch strings.ToLower(filename) {
+	case "angular", "ng":
+		extension = "angular"
+		shellCmd = ""
+	case "react":
+		extension = "react"
+		shellCmd = ""
+	case "flutter":
+		extension = "flutter"
+		shellCmd = "flutter"
+	case "makefile":
+		extension = "cpp"
+		shellCmd = "gcc"
+	case "dockerfile":
+		extension = "docker"
+		shellCmd = "docker"
+	default:
+		extension = filepath.Ext(filename)
+		shellCmd = extension
+	}
+
+	extension = strings.ToLower(strings.Replace(extension, ".", "", 1))
+	name = strings.TrimSuffix(filename, filepath.Ext(filename))
+
+	if len(conf.Command) > 0 {
+		cmdArgs = strings.Fields(conf.Command)
+		shellCmd = cmdArgs[0]
+		cmdArgs = removeArrayIndex(cmdArgs, 0)
+		if conf.RunOutput {
+			run = 1
+		} else {
+			run = 0
+		}
+
+		if shellCmd == "flutter" {
+			extension = shellCmd
+		}
+	}
+
+	// cmdRunOnly("mv ./build/app/outputs/apk/release/app-release.apk d:/amiami.apk")
+	// os.Exit(0)
+
+	switch extension {
+	case "apk", "flutter":
+		// cmdRun2(shellCmd, "build", "apk")
+		cmdRun3(shellCmd, cmdArgs)
+
+	case "angular", "react":
+		cmdRunOnly(conf.Command)
+
+	// case "c", "cpp":
+	// 	cmdRun2(shellCmd, "", filename)
+	// 	cmdRun("./"+name, args, "")
+	// case "docker":
+	// 	// for _, each := range cliArgs {
+	// 	// 	filename = filename + " " + each
+	// 	// }
+
+	// 	args = append(args, "build")
+	// 	args = append(args, "-t")
+
+	// 	for _, each := range cliArgs {
+	// 		args = append(args, each)
+	// 	}
+
+	// 	// fmt.Println(args)
+	// 	cmdRun3(shellCmd, args)
+	// 	args = nil
+	case "c", "cpp", "docker", "go":
+		cmdArgs = append(cmdArgs, filename)
+		cmdRun3(shellCmd, cmdArgs)
+		// cmdRun2(shellCmd, "build", filename)
+
+	default:
+		utilib.Clearscreen()
+		fmt.Println("\n\nInvalid file to run build")
+		os.Exit(0)
+		break
+	}
+
+	if len(conf.Permission) > 0 {
+		if runtime.GOOS == "linux" {
+			// cmdRun2("chmod", conf.Permission, "./"+name)
+			cmdRunOnly("chmod " + conf.Permission + " ./" + name)
+		}
+	}
+
+	cmdShell := "mv"
+
+	if runtime.GOOS == "windows" {
+		if !commandExists(cmdShell) {
+			cmdShell = "cmd /c move"
+		}
+	}
+
+	if len(conf.Output) > 0 {
+		// cmdRun2("mv", "./"+name, conf.Output)
+		cmdRunOnly(cmdShell + " " + name + " " + conf.Output)
+	} else if len(fileOutput) > 0 {
+		cmdRunOnly(cmdShell + " " + name + " " + fileOutput)
+	}
+
+	if len(conf.Execute) > 0 {
+		cmdRunOnly(conf.Execute)
+	}
+
+	utilib.Clearscreen()
+
+	color.Error.Println("Build completed")
+
+	if run == 1 {
+		if len(conf.Output) > 0 {
+			cmdRun(conf.Output, args, "")
+		} else {
+			cmdRun("./"+name, args, "")
+		}
+	}
+
+	args = nil
+	cmdArgs = nil
+}
+
+func commandExists(cmd string) bool {
+	_, err := exec.LookPath(cmd)
+	return err == nil
+}
+
+func cmdRun(shellCmd string, args []string, filename string) {
+	args = append(args, filename)
+
+	for _, each := range cliArgs {
+		args = append(args, each)
+	}
+
+	// log.Println(args)
+
+	if len(shellCmd) > 0 {
+		cmd := exec.Command(shellCmd, args...)
+		args = nil
+
+		// create a pipe for the output of the script
+		cmdReader, err := cmd.StdoutPipe()
+		if err != nil {
+			utilib.Clearscreen()
+			fmt.Fprintln(os.Stderr, "Error creating StdoutPipe for Cmd", err)
+			os.Exit(0)
+			return
+		}
+
+		scanner := bufio.NewScanner(cmdReader)
+		go func() {
+			for scanner.Scan() {
+				// fmt.Printf("\t > %s\n", scanner.Text())
+				// println(scanner.Text())
+				fmt.Printf("%s\n", scanner.Text())
+			}
+		}()
+
+		// bufio.NewReaderSize(cmdReader, 20000000000)
+		// scanner := bufio.NewScanner(cmdReader)
+		// go func() {
+		// 	// buf := make([]byte, 0, 64*1024)
+		// 	// scanner.Buffer(buf, 10240*1024*1024)
+
+		// 	const maxCapacity = 512 * 8096
+		// 	buf := make([]byte, maxCapacity)
+		// 	scanner.Buffer(buf, maxCapacity*(8192*8192)*256)
+		// 	for scanner.Scan() {
+		// 		// fmt.Printf("\t > %s\n", scanner.Text())
+		// 		// println(scanner.Text())
+		// 		fmt.Printf("%s\n", scanner.Text())
+		// 	}
+		// }()
+
+		// scanner := bufio.NewScanner(cmdReader)
+		// // scanner.Split(bufio.ScanWords)
+		// count := 0
+		// go func() {
+		// 	split := func(data []byte, atEOF bool) (advance int, token []byte, err error) {
+		// 		count++
+		// 		fmt.Printf("%t\t%d\t%s\n", atEOF, len(data), data)
+		// 		return 0, nil, nil
+		// 	}
+		// 	scanner.Split(split)
+		// 	buf := make([]byte, 1024*8096)
+		// 	scanner.Buffer(buf, bufio.MaxScanTokenSize*(8192*8192)*256)
+		// 	for scanner.Scan() {
+		// 		// fmt.Printf("%s\n", scanner.Text())
+		// 	}
+
+		// 	buf = nil
+		// 	scanner = nil
+		// 	println(count)
+		// }()
+		err = cmd.Start()
+		if err != nil {
+			// fmt.Fprintln(os.Stderr, "Error starting Cmd", err)
+			// fmt.Println(os.Stderr, "\n\n"+color.FgRed.Render(err)+"\n")
+			os.Exit(0)
+			return
+		}
+
+		err = cmd.Wait()
+		if err != nil {
+			// fmt.Fprintln(os.Stderr, "Error waiting for Cmd", err)
+			// fmt.Println(os.Stderr, "\n\n"+color.FgRed.Render(err)+"\n")
+			os.Exit(0)
+			return
+		}
+	}
+}
+
+func cmdRun2(shellCmd string, opt string, filename string) {
+	cmd := exec.Command(shellCmd, opt, filename)
+	var stdout, stderr []byte
+	var errStdout, errStderr error
+	stdoutIn, _ := cmd.StdoutPipe()
+	stderrIn, _ := cmd.StderrPipe()
+	cmd.Start()
+	go func() {
+		stdout, errStdout = copyAndCapture(os.Stdout, stdoutIn)
+	}()
+	go func() {
+		stderr, errStderr = copyAndCapture(os.Stderr, stderrIn)
+	}()
+	err := cmd.Wait()
+	if err != nil {
+		utilib.Clearscreen()
+		// log.Fatalf("cmd.Run() failed with %s\n", err)
+		// fmt.Println("\n\nCommand error... Please confirm your confirm")
+		// fmt.Println("\n\n" + color.FgRed.Render("Command error... Please confirm") + "\n")
+		fmt.Println("\n\n" + color.FgRed.Render("Terminated ...") + "\n")
+		os.Exit(0)
+	}
+	if errStdout != nil || errStderr != nil {
+		utilib.Clearscreen()
+		// log.Fatalf("failed to capture stdout or stderr\n")
+		// fmt.Println("\n\n" + color.FgRed.Render("Unable to capture output from command...") + "\n")
+		fmt.Println("\n\n" + color.FgRed.Render("Terminated ...") + "\n")
+		os.Exit(0)
+	}
+	// outStr, errStr := string(stdout), string(stderr)
+	// fmt.Printf("\nout:\n%s\nerr:\n%s\n", outStr, errStr)
+	outStr, _ := string(stdout), string(stderr)
+	fmt.Println(outStr)
+	outStr = ""
+	stdoutIn = nil
+	stderrIn = nil
+	errStdout = nil
+	stderr = nil
+	stdout = nil
+}
+
+func cmdRun3(shellCmd string, opt []string) {
+	cmd := exec.Command(shellCmd, opt...)
+	var stdout, stderr []byte
+	var errStdout, errStderr error
+	stdoutIn, _ := cmd.StdoutPipe()
+	stderrIn, _ := cmd.StderrPipe()
+	cmd.Start()
+	go func() {
+		stdout, errStdout = copyAndCapture(os.Stdout, stdoutIn)
+	}()
+	go func() {
+		stderr, errStderr = copyAndCapture(os.Stderr, stderrIn)
+	}()
+	err := cmd.Wait()
+	if err != nil {
+		utilib.Clearscreen()
+		// log.Fatalf("cmd.Run() failed with %s\n", err)
+		// fmt.Println("\n\nCommand error... Please confirm your confirm")
+		// fmt.Println("\n\n" + color.FgRed.Render("Command error... Please confirm") + "\n")
+		fmt.Println("\n\n" + color.FgRed.Render("Terminated ...") + "\n")
+		os.Exit(0)
+	}
+	if errStdout != nil || errStderr != nil {
+		utilib.Clearscreen()
+		// log.Fatalf("failed to capture stdout or stderr\n")
+		// fmt.Println("\n\n" + color.FgRed.Render("Unable to capture output from command...") + "\n")
+		fmt.Println("\n\n" + color.FgRed.Render("Terminated ...") + "\n")
+		os.Exit(0)
+	}
+	// outStr, errStr := string(stdout), string(stderr)
+	// fmt.Printf("\nout:\n%s\nerr:\n%s\n", outStr, errStr)
+	outStr, _ := string(stdout), string(stderr)
+	fmt.Println(outStr)
+	outStr = ""
+	stdoutIn = nil
+	stderrIn = nil
+	errStdout = nil
+	stderr = nil
+	stdout = nil
+}
+
+func cmdRunOnly(cmdString string) {
+	var multiCmd []string
+	// var commands []string
+	var shell string
+	// var secondShell string
+
+	// cmaString = Addslashes(cmdString)
+
+	if strings.Contains(cmdString, "&&") {
+		multiCmd = strings.Split(cmdString, "&&")
+
+		for _, v := range multiCmd {
+			cmdRunOnly(v)
+		}
+
+		multiCmd = nil
+
+	} else {
+		// commands = strings.Fields(cmdString)
+		r := csv.NewReader(strings.NewReader(cmdString))
+		r.Comma = ' ' // space
+		commands, err := r.Read()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		// fmt.Printf("\nFields:\n")
+		// for _, field := range fields {
+		// 	fmt.Printf("%q\n", field)
+		// }
+
+		// fmt.Println(fields)
+
+		shell = commands[0]
+		commands = removeArrayIndex(commands, 0)
+		// secondShell = commands[0]
+		// commands = removeArrayIndex(commands, 0)
+
+		// fmt.Println(commands)
+
+		if output, err := exec.Command(shell, commands...).CombinedOutput(); err != nil {
+			utilib.Clearscreen()
+			fmt.Printf("%s %s \n\nfailed with %s\n\n%s\n\n", color.FgRed.Render(shell), color.FgRed.Render(strings.Join(commands, " ")), err, output)
+		} else {
+			// fmt.Printf("%s\n", c)
+		}
+
+		// cmd := exec.Command(shell, commands...)
+		// // cmd.Stdin = os.Stdin
+		// // _, err := cmd.CombinedOutput()
+		// // cmd := exec.Command(cmdString)
+		// cmd.Stdout = os.Stdout
+		// err := cmd.Run()
+		// if err != nil {
+		// 	fmt.Printf("%s %s \n\nfailed with %s\n", color.FgRed.Render(shell), color.FgRed.Render(strings.Join(commands, " ")), err)
+		// 	os.Exit(0)
+		// }
+
+		commands = nil
+		shell = ""
+
+		// if c, err := exec.Command("cmd", "/c", cmdString).CombinedOutput(); err != nil {
+		// 	log.Fatal(err)
+		// } else {
+		// 	fmt.Printf("%s\n", c)
+		// }
+	}
+
+	// commands := strings.Fields(cmdString)
+	// shell := commands[0]
+	// commands = removeArrayIndex(commands, 0)
+
+	// cmd := exec.Command(shell, commands)
+	// cmd.Stdout = os.Stdout
+	// cmd.Run()
+
+	// cmd := exec.Command("ls", "-lah")
+	// var stdout, stderr bytes.Buffer
+	// cmd.Stdout = &stdout
+	// cmd.Stderr = &stderr
+	// err := cmd.Run()
+	// if err != nil {
+	//     log.Fatalf("cmd.Run() failed with %s\n", err)
+	// }
+	// outStr, errStr := string(stdout.Bytes()), string(stderr.Bytes())
+	// fmt.Printf("out:\n%s\nerr:\n%s\n", outStr, errStr)
+}
+
+func copyAndCapture(w io.Writer, r io.Reader) ([]byte, error) {
+	var out []byte
+	buf := make([]byte, 1024, 1024)
+	for {
+		n, err := r.Read(buf[:])
+		if n > 0 {
+			d := buf[:n]
+			out = append(out, d...)
+			os.Stdout.Write(d)
+		}
+		if err != nil {
+			// Read returns io.EOF at the end of file, which is not an error for us
+			if err == io.EOF {
+				err = nil
+			}
+			return out, err
+		}
+	}
+	// never reached
+	// panic(true)
+	// return nil, nil
+}
+
+func readConf(path ...string) configuration {
 	var confPath string
 
 	if strings.TrimSpace(strings.Join(path, "")) == "" {
@@ -726,6 +741,7 @@ func readConf(path ...string) {
 
 	path = nil
 	confPath = ""
+	return conf
 }
 
 func removeArrayIndex(s []string, index int) []string {

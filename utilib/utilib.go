@@ -1,9 +1,9 @@
 /*
  * @description       : An utilities tool build with GoLang to help user to run build certains files without enter a set of commands with flags (similar with Makefile), supported GoLang, Docker, C and etc...
- * @version           : "1.0.1"
+ * @version           : "1.0.2" (02/06/2020 16:05:30) Rectified write build.yaml file problem
  * @creator           : Gordon Lim <honwei189@gmail.com>
  * @created           : 25/09/2019 19:18:45
- * @last modified     : 02/06/2020 14:04:28
+ * @last modified     : 02/06/2020 16:25:05
  * @last modified by  : Gordon Lim <honwei189@gmail.com>
  */
 
@@ -20,8 +20,8 @@ import (
 	"os/exec"
 	"regexp"
 	"runtime"
-	"strconv"
 	"strings"
+	"strconv"
 	"sync"
 	"time"
 
@@ -51,6 +51,19 @@ var wg sync.WaitGroup
 // func SayHello() string {
 // 	return "Hello from this another package"
 // }
+
+// Clearscreen : Clear console screen
+func Clearscreen() {
+	if runtime.GOOS == "windows" {
+		cmd := exec.Command("cmd", "/c", "cls") //Windows example, its tested
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	} else {
+		cmd := exec.Command("clear") //Linux example, its tested
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+	}
+}
 
 //InitConf Creates build.yaml
 func InitConf() {
@@ -187,41 +200,70 @@ func InitConf() {
 		file = Conf.ProjectName + delimiter + file
 	}
 
-	f, err := os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0775)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	// var contents strings.Builder
 
+	// contents.WriteString("command: " + Conf.Command)
+	// contents.WriteString("file: " + Conf.File)
+
+	// fmt.Println(contents.String())
+
+	contents := fmt.Sprintf("command: %+v\nfile: %+v\npermission: %+v\n# path & new file name\noutput: %+v\nrun_output: %+v\nexecute: %+v\n", 
+		strings.TrimSpace(Conf.Command), 
+		strings.TrimSpace(Conf.File), 
+		strings.TrimSpace(Conf.Permission),
+		strings.TrimSpace(Conf.Output),
+		strconv.FormatBool(Conf.RunOutput),
+		strings.TrimSpace(Conf.Execute))
+
+
+	f, err := os.Create(file)
 	defer f.Close()
 
-	if _, err := f.WriteString("command: " + Conf.Command); err != nil {
-		log.Println(err)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	if _, err := f.WriteString("file: " + Conf.File); err != nil {
-		log.Println(err)
-	}
+	w := bufio.NewWriter(f)
+	w.WriteString(contents)
+	w.Flush()
 
-	if _, err := f.WriteString("permission: " + Conf.Permission); err != nil {
-		log.Println(err)
-	}
+	contents = ""
 
-	if _, err := f.WriteString("# path & new file name\r\n"); err != nil {
-		log.Println(err)
-	}
+	// f, err := os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0775)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
 
-	if _, err := f.WriteString("output: " + Conf.Output); err != nil {
-		log.Println(err)
-	}
+	// defer f.Close()
 
-	if _, err := f.WriteString("run_output: " + strconv.FormatBool(Conf.RunOutput)); err != nil {
-		log.Println(err)
-	}
+	// if _, err := f.WriteString("command: " + Conf.Command); err != nil {
+	// 	log.Println(err)
+	// }
 
-	if _, err := f.WriteString("execute: " + Conf.Execute); err != nil {
-		log.Println(err)
-	}
+	// if _, err := f.WriteString("file: " + Conf.File); err != nil {
+	// 	log.Println(err)
+	// }
+
+	// if _, err := f.WriteString("permission: " + Conf.Permission); err != nil {
+	// 	log.Println(err)
+	// }
+
+	// if _, err := f.WriteString("# path & new file name\r\n"); err != nil {
+	// 	log.Println(err)
+	// }
+
+	// if _, err := f.WriteString("output: " + Conf.Output); err != nil {
+	// 	log.Println(err)
+	// }
+
+	// if _, err := f.WriteString("run_output: " + strconv.FormatBool(Conf.RunOutput)); err != nil {
+	// 	log.Println(err)
+	// }
+
+	// if _, err := f.WriteString("execute: " + Conf.Execute); err != nil {
+	// 	log.Println(err)
+	// }
 
 	dir, _ := os.Getwd()
 	fmt.Println("\n\nConfiguration file saved to " + dir + delimiter + file)
